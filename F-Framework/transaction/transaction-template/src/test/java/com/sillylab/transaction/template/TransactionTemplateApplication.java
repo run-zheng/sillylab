@@ -1,13 +1,13 @@
-package com.sillylab.transaction.template.demo;
+package com.sillylab.transaction.template;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TransactionTemplateDemoApplication {
+public class TransactionTemplateApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TransactionTemplateDemoApplication.class, args);
+        SpringApplication.run(TransactionTemplateApplication.class, args);
     }
 
 }

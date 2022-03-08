@@ -1,4 +1,4 @@
-package com.sillylab.transaction.template.demo.dao;
+package com.sillylab.transaction.template.dao;
 
 import com.sillylab.transaction.template.TransactionExecutorTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Random;
+import java.util.function.Consumer;
 
 @Repository
 public class TestRepository {
@@ -18,9 +19,9 @@ public class TestRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private TransactionExecutorTemplate  transactionExecutorTemplate;
+    private TransactionExecutorTemplate transactionExecutorTemplate;
 
-    public void test() {
+    public void test(Consumer consumer) {
         transactionExecutorTemplate.executeRequired(() -> {
             String addTest = "insert into test(title, author, create_time, update_time) value(?, ?, now(), now())";
 
@@ -34,7 +35,7 @@ public class TestRepository {
                 }
             });
 
-            int i = 1 / new Random().nextInt(10) % 4;
+            consumer.accept(null);
 
             String addUser = "insert into user(name, age, create_time, update_time) values(?, ?, now(), now())";
             jdbcTemplate.update(new PreparedStatementCreator() {
