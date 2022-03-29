@@ -1,4 +1,4 @@
-package com.sillylab;
+package com.sillylab.lambda.articles;
 
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -8,7 +8,7 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 /**
- * Hello world!
+ * https://www.cnblogs.com/CarpenterLee/p/5936664.html
  */
 public class LambdaDemo {
     public static void main(String[] args) {

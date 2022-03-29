@@ -1,5 +1,7 @@
 package com.sillylab.lambda.master;
 
+import com.sillylab.lambda.Main;
+
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -8,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
-public class LambdaDemo1 {
+public class LambdaDemo1 extends Main {
     public static void main(String[] args) {
         List<Point> pointList = Arrays.asList(new Point(1, 2), new Point(2, 3));
         //## 外部迭代到内部迭代
@@ -136,10 +138,6 @@ public class LambdaDemo1 {
         return (c1, c2) -> keyExtractor.apply(c1).compareTo(keyExtractor.apply(c2));
     }
 
-
-    public static void printLine(){
-        System.out.println("-------------------------------------------");
-    }
     /**
      * 命令式写法：action
      */

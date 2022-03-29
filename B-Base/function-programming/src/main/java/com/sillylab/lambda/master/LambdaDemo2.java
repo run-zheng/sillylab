@@ -1,14 +1,16 @@
 package com.sillylab.lambda.master;
 
+import com.sillylab.lambda.Main;
+
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
-public class LambdaDemo2 {
+public class LambdaDemo2 extends Main {
     public static void main(String[] args) {
         //在lambda中再次声明一个局部变量是非法的
 
@@ -76,10 +78,6 @@ public class LambdaDemo2 {
     //6种上下文可以提供恰当的目标类型：返回语句
     public static Runnable returnDatePrinter(){
         return () -> System.out.println(new Date());
-    }
-
-    public static void printLine(){
-        System.out.println("---------------------------------------------");
     }
 
     /**

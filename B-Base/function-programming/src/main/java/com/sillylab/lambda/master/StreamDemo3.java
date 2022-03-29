@@ -70,6 +70,13 @@ public class StreamDemo3 {
         Optional<Book> anyBook = library.stream()
                 .filter(b -> b.getAuthors().contains("Herman Melville"))
                 .findAny();
+        //收集流元素
+        Map<String, Year> titleToPubDate = library.stream()
+                .collect(Collectors.toMap(Book::getTitle, Book::getPubDate));
+        //收集流元素-键重复去重
+        Map<String, Year> titleToPubDate2 = library.stream()
+                .collect(Collectors.toMap(Book::getTitle, Book::getPubDate, (x, y) -> x.isAfter(y) ? x : y));
+
     }
 
     private static List<Book> library() {
