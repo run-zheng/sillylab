@@ -27,3 +27,4 @@ hs_err_pid*
 mvnw.cmd
 mvnw
 
+/F-Framework/mybatis/mybatis-extends/target

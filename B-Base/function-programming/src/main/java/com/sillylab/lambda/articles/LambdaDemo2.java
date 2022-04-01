@@ -1,6 +1,6 @@
 package com.sillylab.lambda.articles;
 
-import com.sillylab.lambda.Main;
+import com.sillylab.lambda.Common;
 
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 /**
  * https://blog.csdn.net/y5492853/article/details/120938444
  */
-public class LambdaDemo2 extends Main {
+public class LambdaDemo2 extends Common {
     public static void main(String[] args) {
         //函数式接口
         IntOperate add = (a, b) -> a + b ;

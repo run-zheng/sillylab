@@ -1,6 +1,6 @@
 package com.sillylab.lambda.master;
 
-import com.sillylab.lambda.Main;
+import com.sillylab.lambda.Common;
 
 import java.awt.*;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
-public class LambdaDemo1 extends Main {
+public class LambdaDemo1 extends Common {
     public static void main(String[] args) {
         List<Point> pointList = Arrays.asList(new Point(1, 2), new Point(2, 3));
         //## 外部迭代到内部迭代

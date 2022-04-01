@@ -1,4 +1,6 @@
-package com.sillylab.lambda.master;
+package com.sillylab.lambda.share;
+
+import com.sillylab.lambda.master.MasterMain;
 
 import java.time.Year;
 import java.util.*;
@@ -6,16 +8,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class StreamDemo3 extends MasterMain{
+public class StreamExample3 extends MasterMain {
     public static void main(String[] args) {
         //流基础，iterate生成无限流
         IntStream.iterate(1, i -> i * 2)
                 .limit(10)
                 .forEachOrdered(System.out::println);
         //原生类型流 频繁装箱/拆箱
-        Optional<Integer> max = Arrays.asList(1, 2, 3, 4, 5).stream()
+        OptionalInt max= //Arrays.asList(1, 2, 3, 4, 5).stream()
+                Arrays.stream(new int[]{1, 2, 3, 4, 5})
                 .map(i -> i + 1)
-                .max(Integer::compareTo);
+                .max();
         //每个原生类型流都有一个boxed方法
         Stream<Integer> is = IntStream.rangeClosed(1, 10).boxed();
         //拆箱的操作可以通过映射转换操作转换成原生流

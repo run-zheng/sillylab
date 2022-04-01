@@ -1,6 +1,6 @@
 package com.sillylab.lambda.master;
 
-import com.sillylab.lambda.Main;
+import com.sillylab.lambda.Common;
 
 import java.awt.*;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
-public class LambdaDemo2 extends Main {
+public class LambdaDemo2 extends Common {
     public static void main(String[] args) {
         //在lambda中再次声明一个局部变量是非法的
 
