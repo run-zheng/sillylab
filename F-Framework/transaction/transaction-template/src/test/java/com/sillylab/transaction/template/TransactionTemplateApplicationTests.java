@@ -1,19 +1,15 @@
 package com.sillylab.transaction.template;
 
 import com.sillylab.transaction.template.dao.TestRepository;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.sillylab.transaction.template.entity.TestInfo;
+import com.sillylab.transaction.template.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,78 +24,159 @@ public class TransactionTemplateApplicationTests {
     private TransactionExecutorTemplate executorTemplate;
 
     @Test
-    public void testService() {
+    public void testRollbackWhenException(){
         Exception exception = assertThrows(
                 RuntimeException.class,
                 () -> testRepository.test(a -> {
-                        throw new RuntimeException("test");
-                    }));
+                    throw new RuntimeException("test");
+                }));
         assertEquals("test", exception.getMessage());
-        List<User> users = getUsers();
-        List<TestInfo> tests = getTestInfos();
+        List<User> users = testRepository.getUsers();
+        List<TestInfo> tests = testRepository.getTestInfos();
         assertTrue(users.isEmpty());
         assertTrue(tests.isEmpty());
+    }
 
-        testRepository.test(a -> { });
-        users = getUsers();
-        tests = getTestInfos();
+    @Test
+    public void testNormalInserAll() {
+        executorTemplate.executeRequired(() -> {
+            testRepository.insertTest(createTest());
+            testRepository.insertUser(createUser());
+        });
+        List<User> users = testRepository.getUsers();
+        List<TestInfo> tests = testRepository.getTestInfos();
         assertTrue(users.size() == 1 );
         assertTrue(tests.size()  == 1 );
+        clearData();
+    }
 
-
-        executorTemplate.executeRequired(() ->{
+    private void clearData() {
+        executorTemplate.executeRequired(() -> {
             jdbcTemplate.execute("delete from test");
             jdbcTemplate.execute("delete from user");
         });
     }
 
-    private List<TestInfo> getTestInfos() {
-        List<TestInfo> tests = jdbcTemplate.query("select * from test", new RowMapper<TestInfo>() {
-            @Override
-            public TestInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new TestInfo(rs.getLong("id"),
-                        rs.getString("title"),
-                        rs.getString("author"),
-                        rs.getDate("create_time"),
-                        rs.getDate("update_time"));
-            }
+    @Test
+    public void testDeleteByRequired(){
+        executorTemplate.executeRequired(() -> {
+            testRepository.insertTest(createTest());
+            testRepository.insertUser(createUser());
         });
-        return tests;
+        List<User> users = testRepository.getUsers();
+        List<TestInfo> tests = testRepository.getTestInfos();
+        assertTrue(users.size() == 1 );
+        assertTrue(tests.size()  == 1 );
+        clearData();
+        users = testRepository.getUsers();
+        tests = testRepository.getTestInfos();
+        assertTrue(users.isEmpty());
+        assertTrue(tests.isEmpty());
     }
 
-    private List<User> getUsers() {
-        List<User> users = jdbcTemplate.query("select * from user", new RowMapper<User>() {
-            @Override
-            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new User(rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getInt("age"),
-                        rs.getDate("create_time"),
-                        rs.getDate("update_time"));
-            }
+    @Test
+    public void testRequiredNew() {
+        executorTemplate.executeRequired(() -> {
+            testRepository.insertTest(createTest());
+            executorTemplate.executeRequiresNew(() -> {
+                testRepository.insertUser(createUser());
+            });
         });
-        return users;
+        List<User> users = testRepository.getUsers();
+        List<TestInfo> tests = testRepository.getTestInfos();
+        assertTrue(users.size() == 1 );
+        assertTrue(tests.size()  == 1);
+        clearData();
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TestInfo{
-        private Long id;
-        private String title;
-        private String author;
-        private Date createTime;
-        private Date updateTime;
+    @Test
+    public void testRequiredNewInnerRollback() {
+        executorTemplate.executeRequired(() -> {
+            testRepository.insertTest(createTest());
+            try {
+                executorTemplate.executeRequiresNew(() -> {
+                    testRepository.insertUser(createUser());
+                    throw new RuntimeException();
+                });
+            }catch (Exception e){
+                //ignore
+            }
+        });
+        List<User> users = testRepository.getUsers();
+        List<TestInfo> tests = testRepository.getTestInfos();
+        assertTrue(users.size() == 0 );
+        assertTrue(tests.size()  == 1);
+        clearData();
     }
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class User {
-        private Long id ;
-        private String name;
-        private Integer age ;
-        private Date createTime;
-        private Date updateTime;
+
+    @Test
+    public void testRequiredNewRollback() {
+        try {
+            executorTemplate.executeRequired(() -> {
+                testRepository.insertTest(createTest());
+                    executorTemplate.executeRequiresNew(() -> {
+                        testRepository.insertUser(createUser());
+                    });
+                throw new RuntimeException();
+            });
+        }catch (Exception e){
+            //ignore
+        }
+        List<User> users = testRepository.getUsers();
+        List<TestInfo> tests = testRepository.getTestInfos();
+        assertTrue(users.size() == 1 );
+        assertTrue(tests.size()  == 0);
+        clearData();
     }
+
+    @Test
+    public void testRequiredWithReturn(){
+        Integer result = executorTemplate.executeRequired(() -> {
+            return testRepository.insertTest(createTest());
+        });
+        assertEquals(1, result.intValue());
+        List<TestInfo> tests = testRepository.getTestInfos();
+        assertTrue(tests.size()  == 1 );
+        clearData();
+        tests = testRepository.getTestInfos();
+        assertTrue(tests.isEmpty());
+    }
+
+    @Test
+    public void testRequireChain() {
+        ITransactionExecutor executor = TransactionExecutorTemplate.of(() -> {
+            testRepository.insertTest(createTest());
+        });
+        //do something
+        executor.andThen(() -> {
+            testRepository.insertUser(createUser());
+        });
+        //do something else
+        executorTemplate.executeRequired(executor);
+        List<User> users = testRepository.getUsers();
+        List<TestInfo> tests = testRepository.getTestInfos();
+        assertTrue(users.size() == 1 );
+        assertTrue(tests.size()  == 1 );
+        clearData();
+        users = testRepository.getUsers();
+        tests = testRepository.getTestInfos();
+        assertTrue(users.isEmpty());
+        assertTrue(tests.isEmpty());
+    }
+
+    private User createUser() {
+        User user = new User();
+        user.setName("3"+System.currentTimeMillis());
+        user.setAge(new Random().nextInt(100));
+        return user;
+    }
+
+    private TestInfo createTest() {
+        TestInfo testInfo = new TestInfo();
+        testInfo.setTitle("1"+System.currentTimeMillis());
+        testInfo.setAuthor("2"+System.currentTimeMillis());
+        return testInfo;
+    }
+
 
 }

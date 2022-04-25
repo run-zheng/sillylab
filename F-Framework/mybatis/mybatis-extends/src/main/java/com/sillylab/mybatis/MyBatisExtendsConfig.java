@@ -3,6 +3,7 @@ package com.sillylab.mybatis;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Properties;
 
 @Configuration
-@ConditionalOnClass({SqlSessionFactory.class})
+@ConditionalOnBean({SqlSessionFactory.class})
 public class MyBatisExtendsConfig {
     @Value("${mybatis.field.createTime:createTime}")
     private String createTimeFieldName;
@@ -24,7 +25,7 @@ public class MyBatisExtendsConfig {
      * @return
      */
     @Bean
-    @ConditionalOnClass({SqlSessionFactory.class})
+    @ConditionalOnBean({SqlSessionFactory.class})
     public TimeInterceptor timeInterceptor(SqlSessionFactory sqlSessionFactory){
         TimeInterceptor timeInterceptor = new TimeInterceptor();
         Properties properties = new Properties();

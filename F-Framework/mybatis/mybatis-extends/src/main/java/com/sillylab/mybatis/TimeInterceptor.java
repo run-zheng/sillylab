@@ -55,7 +55,8 @@ public class TimeInterceptor implements Interceptor {
                 || SqlCommandType.UPDATE.equals(sqlCommandType))){
             //是否可能是mybatis-plus的通用更新接口的参数形式，兼容通用mapper.update
             boolean isPlusUpdate = parameter.getClass().getDeclaredFields().length == 1
-                    && parameter.getClass().getDeclaredFields()[0].getName().equals(SERIAL_VERSION_UID);
+                    && parameter.getClass().getDeclaredFields()[0].getName().equals(SERIAL_VERSION_UID)
+                    && parameter.getClass().isAssignableFrom(Map.class);
             //获取所有定义的属性
             Field[] declareFields = getAllDeclareFields(parameter, isPlusUpdate);
             Date currentDate = new Date();
@@ -76,7 +77,7 @@ public class TimeInterceptor implements Interceptor {
                             if(Objects.equals(this.updateTimeFieldName, f.getName())){
                                 if(isPlusUpdate){
                                     Map<String, Object> updateParams = (Map<String, Object>) parameter;
-                                    if(updateParams.get(MYBATIS_PLUS_PARAM) != null){
+                                    if(updateParams.containsKey(MYBATIS_PLUS_PARAM)){
                                         brokenAccessSetField(updateParams.get(MYBATIS_PLUS_PARAM), currentDate, f);
                                     }
                                 }else {
@@ -108,7 +109,7 @@ public class TimeInterceptor implements Interceptor {
         //mybatis-plus的特殊处理
         if(isPlusUpdate && parameter instanceof Map){
             Map<String, Object> updateParams = (Map<String, Object>)parameter;
-            if(updateParams.get(MYBATIS_PLUS_PARAM) != null){
+            if(updateParams.containsKey(MYBATIS_PLUS_PARAM)){
                 Class<?> updateParamType = updateParams.get(MYBATIS_PLUS_PARAM).getClass();
                 declareFields = updateParamType.getDeclaredFields();
                 if(updateParamType.getSuperclass() != null){

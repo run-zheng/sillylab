@@ -53,4 +53,25 @@ public class TransactionExecutorTemplate{
         Assert.notNull(executor, "事务执行器不能为空");
         return executor.execute();
     }
+
+    /**
+     * 链式起点
+     *
+     * @param executor
+     * @return
+     */
+    public static ITransactionExecutor of(ITransactionExecutor executor){
+        return new ITransactionExecutor() {
+            private ITransactionExecutor executorChain = executor;
+            @Override
+            public void execute() {
+                this.executorChain.execute();
+            }
+
+            @Override
+            public ITransactionExecutor andThen(ITransactionExecutor executor) {
+                return (this.executorChain = executorChain.andThen(executor));
+            }
+        };
+    }
 }
